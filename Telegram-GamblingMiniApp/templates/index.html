@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Payment</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <h1>Make a Deposit</h1>
+    <button onclick="createCheckoutSession(20)">Deposit 20€</button>
+    <button onclick="createCheckoutSession(40)">Deposit 40€</button>
+    <button onclick="createCheckoutSession(100)">Deposit 100€</button>
+
+    <script>
+        async function createCheckoutSession(amount) {
+            const response = await fetch('/create-checkout-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ amount: amount }),
+            });
+
+            const session = await response.json();
+
+            if (session.error) {
+                alert(`Error: ${session.error}`);
+            } else {
+                const stripe = Stripe('pk_test_51PlzJYBXTBMEbr1nlgq2wUJkWv38sr1UUUNWVkYJ7Cpkg32mq7RFSDDADV7I1GNCy8oico6lpDB4TDtcd1K1qh2Q00WjFat1iP'); 
+                const { error } = await stripe.redirectToCheckout({
+                    sessionId: session.id,
+                });
+
+                if (error) {
+                    console.error(error);
+                    alert(`Error: ${error.message}`);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
